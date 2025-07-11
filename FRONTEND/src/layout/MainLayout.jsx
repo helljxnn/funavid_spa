@@ -1,4 +1,5 @@
 import Sidebar from './Sidebar';
+import TopNavbar from './TopNavbar';
 
 function MainLayout({ children }) {
   return (
@@ -6,11 +7,15 @@ function MainLayout({ children }) {
       {/* Sidebar Fijo */}
       <Sidebar />
 
-      {/* Contenido Principal */}
-      <main className="flex-1 p-8 bg-gray-100 overflow-y-auto">
-        {/* Aquí se renderizarán los componentes de cada página (DashboardPage, UsersPage, etc.) */}
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col">
+        {/* TopNavbar */}
+        <TopNavbar />
+
+        {/* Contenido */}
+        <main className="flex-1 p-8 bg-gray-100 overflow-y-auto">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }
