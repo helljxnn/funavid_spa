@@ -15,7 +15,7 @@ export const LoginPage = () => {
     setError(null);
     try {
       const response = await loginUser(username, password);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Credenciales incorrectas. Por favor intenta nuevamente.');
     } finally {

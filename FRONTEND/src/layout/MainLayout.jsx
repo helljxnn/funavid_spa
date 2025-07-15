@@ -1,10 +1,11 @@
 import Sidebar from './Sidebar';
 import TopNavbar from './TopNavbar';
+import { Outlet } from 'react-router-dom';
 
-function MainLayout({ children }) {
+export function MainLayout() {
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar Fijo */}
+      {/* Sidebar */}
       <Sidebar />
 
       <div className="flex-1 flex flex-col">
@@ -13,11 +14,10 @@ function MainLayout({ children }) {
 
         {/* Contenido */}
         <main className="flex-1 p-8 bg-gray-100 overflow-y-auto">
-          {children}
+          <Outlet/>
         </main>
       </div>
     </div>
   );
 }
 
-export default MainLayout;
