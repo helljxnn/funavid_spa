@@ -9,7 +9,7 @@ const mockEmployees = [
   { id: 5, name: 'Carmen Ruiz', role: 'Recepcionista', email: 'carmen.ruiz@example.com', status: 'Inactivo' },
   { id: 6, name: 'Andrés Morales', role: 'Desarrollador', email: 'andres.morales@example.com', status: 'Activo' },
   { id: 7, name: 'Patricia Luna', role: 'Coordinadora', email: 'patricia.luna@example.com', status: 'Inactivo' },
-  { id: 8, name: 'Raúl Gómez', role: 'Soporte', email: 'raul.gomez@example.com', status: 'Activo' },
+  { id: 8, name: 'Raúl Gómez', role: 'Soporte', email: 'raul.gomeez@example.com', status: 'Activo' },
 ];
 
 export const Employees = () => {
