@@ -1,4 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import {
+  showCreateConfirmation,
+  showViewDetails,
+  showEditConfirmation,
+  showDeleteConfirmation
+} from "../../../shared/utils/alerts";
 
 // Datos mockeados para donaciones
 const mockDonations = [
@@ -49,6 +55,30 @@ export const Donations = () => {
     }
   };
 
+  // Funciones para manejar las alertas
+  const handleCreateDonation = () => {
+    showCreateConfirmation('Donación');
+  };
+
+  const handleViewDonation = (donation) => {
+    showViewDetails(donation.donorName, {
+      Monto: `$${donation.amount}`,
+      Fecha: donation.date,
+      Estado: donation.status,
+    });
+  };
+
+  const handleEditDonation = (donation) => {
+    showEditConfirmation('Donación', donation.donorName);
+  };
+
+  const handleDeleteDonation = (donationId, donorName) => {
+    showDeleteConfirmation('Donación', donorName, () => {
+      const updatedDonations = donations.filter((donation) => donation.id !== donationId);
+      setDonations(updatedDonations);
+    });
+  };
+
   return (
     <div className="container mx-auto p-6">
       {/* Título y botón de Crear */}
@@ -56,6 +86,7 @@ export const Donations = () => {
         <h1 className="text-3xl font-bold text-[#4285F4]">Lista de Donaciones</h1>
         <button
           className="bg-[#34A853] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[#2E964A] transition duration-200 shadow-md"
+          onClick={handleCreateDonation}
         >
           Crear Donación
         </button>
@@ -96,16 +127,19 @@ export const Donations = () => {
                   <td className="py-3 px-4 flex space-x-2">
                     <button
                       className="bg-[#4285F4] text-white font-medium py-1 px-3 rounded-md hover:bg-[#3A78D6] transition duration-200 shadow-sm"
+                      onClick={() => handleViewDonation(donation)}
                     >
                       Ver
                     </button>
                     <button
                       className="bg-[#FBBC05] text-white font-medium py-1 px-3 rounded-md hover:bg-[#E3A704] transition duration-200 shadow-sm"
+                      onClick={() => handleEditDonation(donation)}
                     >
                       Editar
                     </button>
                     <button
                       className="bg-[#EA4335] text-white font-medium py-1 px-3 rounded-md hover:bg-[#D13B2F] transition duration-200 shadow-sm"
+                      onClick={() => handleDeleteDonation(donation.id, donation.donorName)}
                     >
                       Eliminar
                     </button>
