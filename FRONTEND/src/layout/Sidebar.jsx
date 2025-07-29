@@ -5,9 +5,18 @@ import {
   MdPeople,
   MdKeyboardArrowDown,
   MdKeyboardArrowUp,
+  MdAdminPanelSettings,
+  MdMedicalServices,
+  MdFavorite,
+  MdHistory,
+  MdCalendarToday,
+  MdEvent,
+  MdCelebration,
+  MdVolunteerActivism,
+  MdCategory,
 } from "react-icons/md";
-import { RiServiceLine } from "react-icons/ri";
-import { FaPersonBreastfeeding } from "react-icons/fa6";
+import { FaUserDoctor, FaHandHoldingHeart } from "react-icons/fa6";
+import { BiDonateHeart } from "react-icons/bi";
 import logo from "../assets/Logo.png";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -34,73 +43,73 @@ export default function Sidebar() {
         {
           name: "Administrativos",
           path: "/administrators",
-          icon: FaPersonBreastfeeding,
+          icon: MdAdminPanelSettings,
         },
         {
           name: "Profesionales",
           path: "/professionals",
-          icon: MdPeople,
+          icon: FaUserDoctor,
         },
       ],
     },
     {
       name: "Beneficiarios",
-      icon: MdPeople,
+      icon: MdFavorite,
       type: "parent",
       subItems: [
         {
           name: "Beneficiarios",
           path: "/beneficiaries",
-          icon: FaPersonBreastfeeding,
+          icon: FaHandHoldingHeart,
         },
         {
           name: "Historias Beneficiarios",
           path: "/beneficiariesstories",
-          icon: MdPeople,
+          icon: MdHistory,
         },
         {
           name: "Citas Médicas",
           path: "/medicalappointments",
-          icon: FaPersonBreastfeeding,
+          icon: MdMedicalServices,
         },
       ],
     },
     {
       name: "Eventos",
-      icon: MdPeople,
+      icon: MdEvent,
       type: "parent",
       subItems: [
         {
           name: "Eventos",
           path: "/events",
-          icon: FaPersonBreastfeeding,
+          icon: MdCalendarToday,
         },
         {
-          name: "Eventos Fundaciòn",
+          name: "Eventos Fundación",
           path: "/foundationevents",
-          icon: MdPeople,
+          icon: MdEvent,
         },
         {
           name: "Cumpleaños",
           path: "/birthdays",
-          icon: FaPersonBreastfeeding,
+          icon: MdCelebration,
         },
       ],
     },
     {
       name: "Donaciones",
-      icon: MdPeople,
+      icon: BiDonateHeart,
       type: "parent",
       subItems: [
         {
           name: "Tipos Donaciones",
           path: "/donationstypes",
-          icon: FaPersonBreastfeeding,
+          icon: MdCategory,
         },
         {
           name: "Donaciones",
           path: "/donations",
-          icon: MdPeople,
+          icon: MdVolunteerActivism,
         },
       ],
     },
