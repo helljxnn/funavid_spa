@@ -1,4 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import {
+  showCreateConfirmation,
+  showViewDetails,
+  showEditConfirmation,
+  showDeleteConfirmation
+} from "../../../shared/utils/alerts";
 
 // Datos mockeados para empleados
 const mockEmployees = [
@@ -49,6 +55,30 @@ export const Employees = () => {
     }
   };
 
+  // Funciones para manejar las alertas
+  const handleCreateEmployee = () => {
+    showCreateConfirmation('Empleado');
+  };
+
+  const handleViewEmployee = (employee) => {
+    showViewDetails(employee.name, {
+      Rol: employee.role,
+      Email: employee.email,
+      Estado: employee.status,
+    });
+  };
+
+  const handleEditEmployee = (employee) => {
+    showEditConfirmation('Empleado', employee.name);
+  };
+
+  const handleDeleteEmployee = (employeeId, employeeName) => {
+    showDeleteConfirmation('Empleado', employeeName, () => {
+      const updatedEmployees = employees.filter((employee) => employee.id !== employeeId);
+      setEmployees(updatedEmployees);
+    });
+  };
+
   return (
     <div className="container mx-auto p-6">
       {/* Título y botón de Crear */}
@@ -56,6 +86,7 @@ export const Employees = () => {
         <h1 className="text-3xl font-bold text-[#4285F4]">Lista de Empleados</h1>
         <button
           className="bg-[#34A853] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[#2E964A] transition duration-200 shadow-md"
+          onClick={handleCreateEmployee}
         >
           Crear Empleado
         </button>
@@ -96,16 +127,19 @@ export const Employees = () => {
                   <td className="py-3 px-4 flex space-x-2">
                     <button
                       className="bg-[#4285F4] text-white font-medium py-1 px-3 rounded-md hover:bg-[#3A78D6] transition duration-200 shadow-sm"
+                      onClick={() => handleViewEmployee(employee)}
                     >
                       Ver
                     </button>
                     <button
                       className="bg-[#FBBC05] text-white font-medium py-1 px-3 rounded-md hover:bg-[#E3A704] transition duration-200 shadow-sm"
+                      onClick={() => handleEditEmployee(employee)}
                     >
                       Editar
                     </button>
                     <button
                       className="bg-[#EA4335] text-white font-medium py-1 px-3 rounded-md hover:bg-[#D13B2F] transition duration-200 shadow-sm"
+                      onClick={() => handleDeleteEmployee(employee.id, employee.name)}
                     >
                       Eliminar
                     </button>
