@@ -2,10 +2,17 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { getToken } from './features/auth/pages/auth';
 import { MainLayout } from './layout/MainLayout';
-import { DashboardPage } from './features/dashboard/pages/DashboardPage';
-import { Donations } from './features/dashboard/pages/Donations';
-import { Employees } from './features/dashboard/pages/Employees';
-import { Clients } from './features/dashboard/pages/Clients';
+import { DashboardPage } from './features/dashboard/pages/DashboardPage'
+import { Beneficiaries } from './features/dashboard/pages/beneficiaries/Beneficiaries';
+import { BeneficiariesStories } from './features/dashboard/pages/beneficiaries/BeneficiariesStories';
+import { MedicalAppointments } from './features/dashboard/pages/beneficiaries/MedicalAppointments';
+import { Donations } from './features/dashboard/pages/donations/Donations';
+import { DonationsTypes } from './features/dashboard/pages/donations/DonationsTypes';
+import { Birthdays } from './features/dashboard/pages/events/Birthdays';
+import { Events } from './features/dashboard/pages/events/Events';
+import { FoundationEvents } from './features/dashboard/pages/events/FoundationEvents';
+import { Administrators } from './features/dashboard/pages/users/Administrators';
+import { Professionals } from './features/dashboard/pages/users/Professionals';
 
 // Componente de Ruta Protegida
 const ProtectedRoute = ({ children }) => {
@@ -38,9 +45,17 @@ function App() {
           <Route index path="/dashboard" element={<DashboardPage />} />
           
           {/* Otras rutas protegidas */}
-          <Route path="/donations" element={<Donations />} />
-          <Route path="/employees" element={<Employees />} />
-          <Route path="/clients" element={<Clients />} />
+          <Route path="/beneficiaries" element={<Beneficiaries />} />
+          <Route path="/beneficiariesstories" element={<BeneficiariesStories/>}/>
+          <Route path="/medicalappointments" element={<MedicalAppointments/>}/>
+          <Route path="/donations" element={<Donations/>}/>
+          <Route path="/donationstypes" element={<DonationsTypes/>}/>
+          <Route path="/birthdays" element={<Birthdays/>}/>
+          <Route path="/events" element={<Events/>}/>
+          <Route path="/foundationevents" element={<FoundationEvents/>}/>
+          <Route path="/administrators" element={<Administrators/>}/>
+          <Route path="/professionals" element={<Professionals/>}/>
+
         </Route>
 
         {/* Ruta para páginas no encontradas */}

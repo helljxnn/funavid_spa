@@ -4,39 +4,30 @@ import {
   showViewDetails,
   showEditConfirmation,
   showDeleteConfirmation
-} from "../../../shared/utils/alerts";
+} from '../../../../shared/utils/alerts';
 
-// Datos mockeados para donaciones
-const mockDonations = [
-  { id: 1, donorName: 'Juan Pérez', amount: 100, date: '2025-07-01', status: 'Completada' },
-  { id: 2, donorName: 'María Gómez', amount: 250, date: '2025-07-02', status: 'Pendiente' },
-  { id: 3, donorName: 'Carlos López', amount: 500, date: '2025-07-03', status: 'Completada' },
-  { id: 4, donorName: 'Ana Martínez', amount: 150, date: '2025-07-04', status: 'Completada' },
-  { id: 5, donorName: 'Luis Rodríguez', amount: 300, date: '2025-07-05', status: 'Pendiente' },
-  { id: 6, donorName: 'Sofía Torres', amount: 200, date: '2025-07-06', status: 'Completada' },
-  { id: 7, donorName: 'Pedro Sánchez', amount: 400, date: '2025-07-07', status: 'Pendiente' },
-  { id: 8, donorName: 'Laura Fernández', amount: 120, date: '2025-07-08', status: 'Completada' },
+// Datos mockeados para eventos de la fundación
+const mockFoundationEvents = [
+  { id: 1, name: 'Día de la Esperanza', date: '2025-08-15', type: 'Recaudación', status: 'Planificado' },
+  { id: 2, name: 'Festival de Colores', date: '2025-09-10', type: 'Cultural', status: 'Completado' },
+  { id: 3, name: 'Maratón Solidaria', date: '2025-10-05', type: 'Deportivo', status: 'Planificado' },
 ];
 
-export const Donations = () => {
-  const [donations, setDonations] = useState([]);
+export const FoundationEvents = () => {
+  const [foundationEvents, setFoundationEvents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [donationsPerPage] = useState(6); // Máximo 6 registros por página
+  const [eventsPerPage] = useState(6);
 
-  // Simulación de carga de datos
   useEffect(() => {
-    setDonations(mockDonations);
+    setFoundationEvents(mockFoundationEvents);
   }, []);
 
-  // Calcular los índices de las donaciones a mostrar
-  const indexOfLastDonation = currentPage * donationsPerPage;
-  const indexOfFirstDonation = indexOfLastDonation - donationsPerPage;
-  const currentDonations = donations.slice(indexOfFirstDonation, indexOfLastDonation);
+  const indexOfLastEvent = currentPage * eventsPerPage;
+  const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
+  const currentEvents = foundationEvents.slice(indexOfFirstEvent, indexOfLastEvent);
 
-  // Calcular el número total de páginas
-  const totalPages = Math.ceil(donations.length / donationsPerPage);
+  const totalPages = Math.ceil(foundationEvents.length / eventsPerPage);
 
-  // Funciones para cambiar de página
   const nextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
@@ -55,91 +46,88 @@ export const Donations = () => {
     }
   };
 
-  // Funciones para manejar las alertas
-  const handleCreateDonation = () => {
-    showCreateConfirmation('Donación');
+  const handleCreateEvent = () => {
+    showCreateConfirmation('Evento');
   };
 
-  const handleViewDonation = (donation) => {
-    showViewDetails(donation.donorName, {
-      Monto: `$${donation.amount}`,
-      Fecha: donation.date,
-      Estado: donation.status,
+  const handleViewEvent = (event) => {
+    showViewDetails(event.name, {
+      Fecha: event.date,
+      Tipo: event.type,
+      Estado: event.status,
     });
   };
 
-  const handleEditDonation = (donation) => {
-    showEditConfirmation('Donación', donation.donorName);
+  const handleEditEvent = (event) => {
+    showEditConfirmation('Evento', event.name);
   };
 
-  const handleDeleteDonation = (donationId, donorName) => {
-    showDeleteConfirmation('Donación', donorName, () => {
-      const updatedDonations = donations.filter((donation) => donation.id !== donationId);
-      setDonations(updatedDonations);
+  const handleDeleteEvent = (eventId, eventName) => {
+    showDeleteConfirmation('Evento', eventName, () => {
+      const updatedEvents = foundationEvents.filter((event) => event.id !== eventId);
+      setFoundationEvents(updatedEvents);
     });
   };
 
   return (
     <div className="container mx-auto p-6">
-      {/* Título y botón de Crear */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-[#4285F4]">Lista de Donaciones</h1>
+        <h1 className="text-3xl font-bold text-[#4285F4]">Lista de Eventos de la Fundación</h1>
         <button
           className="bg-[#34A853] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[#2E964A] transition duration-200 shadow-md"
-          onClick={handleCreateDonation}
+          onClick={handleCreateEvent}
         >
-          Crear Donación
+          Crear Evento
         </button>
       </div>
 
-      {/* Tabla */}
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white shadow-lg rounded-lg">
           <thead className="bg-[#4285F4] text-white">
             <tr>
               <th className="py-3 px-4 text-left font-semibold">ID</th>
-              <th className="py-3 px-4 text-left font-semibold">Donante</th>
-              <th className="py-3 px-4 text-left font-semibold">Monto</th>
+              <th className="py-3 px-4 text-left font-semibold">Nombre</th>
               <th className="py-3 px-4 text-left font-semibold">Fecha</th>
+              <th className="py-3 px-4 text-left font-semibold">Tipo</th>
               <th className="py-3 px-4 text-left font-semibold">Estado</th>
               <th className="py-3 px-4 text-left font-semibold">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {currentDonations.length > 0 ? (
-              currentDonations.map((donation) => (
-                <tr key={donation.id} className="border-b hover:bg-gray-50 transition duration-150">
-                  <td className="py-3 px-4 text-gray-700">{donation.id}</td>
-                  <td className="py-3 px-4 text-gray-700">{donation.donorName}</td>
-                  <td className="py-3 px-4 text-gray-700">${donation.amount}</td>
-                  <td className="py-3 px-4 text-gray-700">{donation.date}</td>
+            {currentEvents.length > 0 ? (
+              currentEvents.map((event) => (
+                <tr key={event.id} className="border-b hover:bg-gray-50 transition duration-150">
+                  <td className="py-3 px-4 text-gray-700">{event.id}</td>
+                  <td className="py-3 px-4 text-gray-700">{event.name}</td>
+                  <td className="py-3 px-4 text-gray-700">{event.date}</td>
+                  <td className="py-3 px-4 text-gray-700">{event.type}</td>
                   <td className="py-3 px-4">
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        donation.status === 'Completada'
+                        event.status === 'Completado'
                           ? 'bg-[#34A853]/20 text-[#34A853]'
-                          : 'bg-[#EA4335]/20 text-[#EA4335]'
+                          : 'bg-[#FBBC05]/20 text-[#FBBC05]'
                       }`}
                     >
-                      {donation.status}
+                      {event.status}
                     </span>
                   </td>
                   <td className="py-3 px-4 flex space-x-2">
                     <button
                       className="bg-[#4285F4] text-white font-medium py-1 px-3 rounded-md hover:bg-[#3A78D6] transition duration-200 shadow-sm"
-                      onClick={() => handleViewDonation(donation)}
+                      onClick={() => handleViewEvent(event)}
                     >
                       Ver
                     </button>
                     <button
                       className="bg-[#FBBC05] text-white font-medium py-1 px-3 rounded-md hover:bg-[#E3A704] transition duration-200 shadow-sm"
-                      onClick={() => handleEditDonation(donation)}
+                      onClick={() => handleEditEvent(event)}
                     >
                       Editar
                     </button>
                     <button
                       className="bg-[#EA4335] text-white font-medium py-1 px-3 rounded-md hover:bg-[#D13B2F] transition duration-200 shadow-sm"
-                      onClick={() => handleDeleteDonation(donation.id, donation.donorName)}
+                      onClick={() => handleDeleteEvent(event.id, event.name)}
                     >
                       Eliminar
                     </button>
@@ -149,7 +137,7 @@ export const Donations = () => {
             ) : (
               <tr>
                 <td colSpan="6" className="py-3 px-4 text-center text-gray-500">
-                  No hay donaciones disponibles
+                  No hay eventos disponibles
                 </td>
               </tr>
             )}
@@ -157,12 +145,11 @@ export const Donations = () => {
         </table>
       </div>
 
-      {/* Paginador */}
       <div className="flex justify-between items-center mt-4">
         <div className="text-gray-600">
-          Mostrando {indexOfFirstDonation + 1} -{' '}
-          {indexOfLastDonation > donations.length ? donations.length : indexOfLastDonation} de{' '}
-          {donations.length} donaciones
+          Mostrando {indexOfFirstEvent + 1} -{' '}
+          {indexOfLastEvent > foundationEvents.length ? foundationEvents.length : indexOfLastEvent} de{' '}
+          {foundationEvents.length} eventos
         </div>
         <div className="flex space-x-2">
           <button

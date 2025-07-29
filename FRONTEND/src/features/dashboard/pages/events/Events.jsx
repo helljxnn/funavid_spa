@@ -4,39 +4,30 @@ import {
   showViewDetails,
   showEditConfirmation,
   showDeleteConfirmation
-} from "../../../shared/utils/alerts";
+} from '../../../../shared/utils/alerts';
 
-// Datos mockeados para empleados
-const mockEmployees = [
-  { id: 1, name: 'Elena Vargas', role: 'Gerente', email: 'elena.vargas@example.com', status: 'Activo' },
-  { id: 2, name: 'Miguel Díaz', role: 'Asistente', email: 'miguel.diaz@example.com', status: 'Inactivo' },
-  { id: 3, name: 'Lucía Ramírez', role: 'Contadora', email: 'lucia.ramirez@example.com', status: 'Activo' },
-  { id: 4, name: 'Jorge Castillo', role: 'Analista', email: 'jorge.castillo@example.com', status: 'Activo' },
-  { id: 5, name: 'Carmen Ruiz', role: 'Recepcionista', email: 'carmen.ruiz@example.com', status: 'Inactivo' },
-  { id: 6, name: 'Andrés Morales', role: 'Desarrollador', email: 'andres.morales@example.com', status: 'Activo' },
-  { id: 7, name: 'Patricia Luna', role: 'Coordinadora', email: 'patricia.luna@example.com', status: 'Inactivo' },
-  { id: 8, name: 'Raúl Gómez', role: 'Soporte', email: 'raul.gomeez@example.com', status: 'Activo' },
+// Datos mockeados para eventos
+const mockEvents = [
+  { id: 1, name: 'Día de la Alegría', date: '2025-08-20', location: 'Parque Central', status: 'Programado' },
+  { id: 2, name: 'Taller de Arte', date: '2025-09-05', location: 'Centro Comunitario', status: 'Finalizado' },
+  { id: 3, name: 'Noche de Talentos', date: '2025-10-12', location: 'Auditorio Fundación', status: 'Programado' },
 ];
 
-export const Employees = () => {
-  const [employees, setEmployees] = useState([]);
+export const Events = () => {
+  const [events, setEvents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [employeesPerPage] = useState(6); // Máximo 6 registros por página
+  const [eventsPerPage] = useState(6);
 
-  // Simulación de carga de datos
   useEffect(() => {
-    setEmployees(mockEmployees);
+    setEvents(mockEvents);
   }, []);
 
-  // Calcular los índices de los empleados a mostrar
-  const indexOfLastEmployee = currentPage * employeesPerPage;
-  const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
-  const currentEmployees = employees.slice(indexOfFirstEmployee, indexOfLastEmployee);
+  const indexOfLastEvent = currentPage * eventsPerPage;
+  const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
+  const currentEvents = events.slice(indexOfFirstEvent, indexOfLastEvent);
 
-  // Calcular el número total de páginas
-  const totalPages = Math.ceil(employees.length / employeesPerPage);
+  const totalPages = Math.ceil(events.length / eventsPerPage);
 
-  // Funciones para cambiar de página
   const nextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
@@ -55,91 +46,88 @@ export const Employees = () => {
     }
   };
 
-  // Funciones para manejar las alertas
-  const handleCreateEmployee = () => {
-    showCreateConfirmation('Empleado');
+  const handleCreateEvent = () => {
+    showCreateConfirmation('Evento');
   };
 
-  const handleViewEmployee = (employee) => {
-    showViewDetails(employee.name, {
-      Rol: employee.role,
-      Email: employee.email,
-      Estado: employee.status,
+  const handleViewEvent = (event) => {
+    showViewDetails(event.name, {
+      Fecha: event.date,
+      Ubicación: event.location,
+      Estado: event.status,
     });
   };
 
-  const handleEditEmployee = (employee) => {
-    showEditConfirmation('Empleado', employee.name);
+  const handleEditEvent = (event) => {
+    showEditConfirmation('Evento', event.name);
   };
 
-  const handleDeleteEmployee = (employeeId, employeeName) => {
-    showDeleteConfirmation('Empleado', employeeName, () => {
-      const updatedEmployees = employees.filter((employee) => employee.id !== employeeId);
-      setEmployees(updatedEmployees);
+  const handleDeleteEvent = (eventId, eventName) => {
+    showDeleteConfirmation('Evento', eventName, () => {
+      const updatedEvents = events.filter((event) => event.id !== eventId);
+      setEvents(updatedEvents);
     });
   };
 
   return (
     <div className="container mx-auto p-6">
-      {/* Título y botón de Crear */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-[#4285F4]">Lista de Empleados</h1>
+        <h1 className="text-3xl font-bold text-[#4285F4]">Lista de Eventos</h1>
         <button
           className="bg-[#34A853] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[#2E964A] transition duration-200 shadow-md"
-          onClick={handleCreateEmployee}
+          onClick={handleCreateEvent}
         >
-          Crear Empleado
+          Crear Evento
         </button>
       </div>
 
-      {/* Tabla */}
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white shadow-lg rounded-lg">
           <thead className="bg-[#4285F4] text-white">
             <tr>
               <th className="py-3 px-4 text-left font-semibold">ID</th>
               <th className="py-3 px-4 text-left font-semibold">Nombre</th>
-              <th className="py-3 px-4 text-left font-semibold">Rol</th>
-              <th className="py-3 px-4 text-left font-semibold">Email</th>
+              <th className="py-3 px-4 text-left font-semibold">Fecha</th>
+              <th className="py-3 px-4 text-left font-semibold">Ubicación</th>
               <th className="py-3 px-4 text-left font-semibold">Estado</th>
               <th className="py-3 px-4 text-left font-semibold">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {currentEmployees.length > 0 ? (
-              currentEmployees.map((employee) => (
-                <tr key={employee.id} className="border-b hover:bg-gray-50 transition duration-150">
-                  <td className="py-3 px-4 text-gray-700">{employee.id}</td>
-                  <td className="py-3 px-4 text-gray-700">{employee.name}</td>
-                  <td className="py-3 px-4 text-gray-700">{employee.role}</td>
-                  <td className="py-3 px-4 text-gray-700">{employee.email}</td>
+            {currentEvents.length > 0 ? (
+              currentEvents.map((event) => (
+                <tr key={event.id} className="border-b hover:bg-gray-50 transition duration-150">
+                  <td className="py-3 px-4 text-gray-700">{event.id}</td>
+                  <td className="py-3 px-4 text-gray-700">{event.name}</td>
+                  <td className="py-3 px-4 text-gray-700">{event.date}</td>
+                  <td className="py-3 px-4 text-gray-700">{event.location}</td>
                   <td className="py-3 px-4">
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        employee.status === 'Activo'
+                        event.status === 'Finalizado'
                           ? 'bg-[#34A853]/20 text-[#34A853]'
-                          : 'bg-[#EA4335]/20 text-[#EA4335]'
+                          : 'bg-[#FBBC05]/20 text-[#FBBC05]'
                       }`}
                     >
-                      {employee.status}
+                      {event.status}
                     </span>
                   </td>
                   <td className="py-3 px-4 flex space-x-2">
                     <button
                       className="bg-[#4285F4] text-white font-medium py-1 px-3 rounded-md hover:bg-[#3A78D6] transition duration-200 shadow-sm"
-                      onClick={() => handleViewEmployee(employee)}
+                      onClick={() => handleViewEvent(event)}
                     >
                       Ver
                     </button>
                     <button
                       className="bg-[#FBBC05] text-white font-medium py-1 px-3 rounded-md hover:bg-[#E3A704] transition duration-200 shadow-sm"
-                      onClick={() => handleEditEmployee(employee)}
+                      onClick={() => handleEditEvent(event)}
                     >
                       Editar
                     </button>
                     <button
                       className="bg-[#EA4335] text-white font-medium py-1 px-3 rounded-md hover:bg-[#D13B2F] transition duration-200 shadow-sm"
-                      onClick={() => handleDeleteEmployee(employee.id, employee.name)}
+                      onClick={() => handleDeleteEvent(event.id, event.name)}
                     >
                       Eliminar
                     </button>
@@ -149,7 +137,7 @@ export const Employees = () => {
             ) : (
               <tr>
                 <td colSpan="6" className="py-3 px-4 text-center text-gray-500">
-                  No hay empleados disponibles
+                  No hay eventos disponibles
                 </td>
               </tr>
             )}
@@ -157,12 +145,11 @@ export const Employees = () => {
         </table>
       </div>
 
-      {/* Paginador */}
       <div className="flex justify-between items-center mt-4">
         <div className="text-gray-600">
-          Mostrando {indexOfFirstEmployee + 1} -{' '}
-          {indexOfLastEmployee > employees.length ? employees.length : indexOfLastEmployee} de{' '}
-          {employees.length} empleados
+          Mostrando {indexOfFirstEvent + 1} -{' '}
+          {indexOfLastEvent > events.length ? events.length : indexOfLastEvent} de{' '}
+          {events.length} eventos
         </div>
         <div className="flex space-x-2">
           <button
