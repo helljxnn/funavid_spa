@@ -12,3 +12,8 @@ dist/
 
 # Logs
 *.log
+
+# firebase
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
