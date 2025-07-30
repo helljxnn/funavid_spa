@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 export const LoginForm = ({ onSubmit, isLoading, error }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -10,7 +11,7 @@ export const LoginForm = ({ onSubmit, isLoading, error }) => {
   };
 
   return (
-      <form onSubmit={handleSubmit} className="p-6 w-full max-w-md bg-white border border-gray-200 rounded-lg">
+    <form onSubmit={handleSubmit} className="p-6 w-full max-w-md bg-white border border-gray-200 rounded-lg">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-800">Iniciar Sesión</h2>
         <p className="mt-2 text-gray-500">Ingresa tus credenciales</p>
@@ -42,7 +43,7 @@ export const LoginForm = ({ onSubmit, isLoading, error }) => {
           <input
             type="text"
             id="username"
-            className="w-full py-2 pl-10 pr-4 rounded-md bg-white border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="w-full py-2 pl-10 pr-4 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             placeholder="nombre@ejemplo.com"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
@@ -60,20 +61,43 @@ export const LoginForm = ({ onSubmit, isLoading, error }) => {
             <svg className="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"
-                d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 616 0z"
                 clipRule="evenodd"
               />
             </svg>
           </div>
           <input
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             id="password"
-            className="w-full py-2 pl-10 pr-4 rounded-md bg-white border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            placeholder="••••••••"
+            className="w-full py-2 pl-10 pr-10 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            placeholder="Ingresa tu contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 focus:outline-none"
+          >
+            {showPassword ? (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                <path
+                  fillRule="evenodd"
+                  d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                <line x1="2" y1="2" x2="22" y2="22" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
 

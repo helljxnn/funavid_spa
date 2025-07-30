@@ -5,10 +5,12 @@ import { loginUser } from '../pages/auth';
 import loginBackground from '../../../assets/login/login-background.png';
 import logo from '../../../assets/Logo.png'
 
+
 export const LoginPage = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  
 
   const handleLogin = async ({ username, password }) => {
     setIsLoading(true);
