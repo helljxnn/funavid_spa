@@ -107,13 +107,13 @@ export const Administrators = () => {
         const updatedAdministrators = administrators.map((admin) =>
           admin.id === selectedAdmin.id
             ? {
-                ...admin,
-                name: `${formData.name} ${formData.lastName}`,
-                role: formData.role,
-                address: formData.address,
-                phone: formData.phone,
-                gender: formData.gender,
-              }
+              ...admin,
+              name: `${formData.name} ${formData.lastName}`,
+              role: formData.role,
+              address: formData.address,
+              phone: formData.phone,
+              gender: formData.gender,
+            }
             : admin
         );
         setAdministrators(updatedAdministrators);
@@ -401,8 +401,8 @@ export const Administrators = () => {
         </div>
       )}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-white shadow-lg rounded-lg">
+      <div className="overflow-x-auto rounded-lg shadow-lg">
+        <table className="min-w-full bg-white">
           <thead className="bg-[#4285F4] text-white">
             <tr>
               <th className="py-3 px-4 text-left font-semibold">ID</th>
@@ -410,9 +410,6 @@ export const Administrators = () => {
               <th className="py-3 px-4 text-left font-semibold">Rol</th>
               <th className="py-3 px-4 text-left font-semibold">Email</th>
               <th className="py-3 px-4 text-left font-semibold">Estado</th>
-              <th className="py-3 px-4 text-left font-semibold">Dirección</th>
-              <th className="py-3 px-4 text-left font-semibold">Teléfono</th>
-              <th className="py-3 px-4 text-left font-semibold">Género</th>
               <th className="py-3 px-4 text-left font-semibold">Acciones</th>
             </tr>
           </thead>
@@ -435,9 +432,6 @@ export const Administrators = () => {
                       {administrator.status}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-gray-700">{administrator.address}</td>
-                  <td className="py-3 px-4 text-gray-700">{administrator.phone}</td>
-                  <td className="py-3 px-4 text-gray-700">{administrator.gender}</td>
                   <td className="py-3 px-4 flex space-x-2">
                     <button
                       className="bg-[#4285F4] text-white font-medium py-2 px-3 rounded-lg hover:bg-[#3A78D6] transition duration-200 shadow-sm"
@@ -462,7 +456,7 @@ export const Administrators = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="9" className="py-3 px-4 text-center text-gray-500">
+                <td colSpan="6" className="py-3 px-4 text-center text-gray-500">
                   No hay administradores disponibles
                 </td>
               </tr>
@@ -471,7 +465,7 @@ export const Administrators = () => {
         </table>
       </div>
 
-      <div className="flex justify-between items-center mt-4">
+      <div className="flex flex-col md:flex-row justify-between items-center mt-4 space-y-4 md:space-y-0">
         <div className="text-gray-700">
           Mostrando {indexOfFirstAdministrator + 1} -{' '}
           {indexOfLastAdministrator > administrators.length ? administrators.length : indexOfLastAdministrator} de{' '}
