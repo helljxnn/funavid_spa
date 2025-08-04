@@ -1,26 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   showCreateConfirmation,
   showViewDetails,
   showEditConfirmation,
-  showDeleteConfirmation
+  showDeleteConfirmation,
 } from '../../../../shared/utils/alerts';
 
-// Datos mockeados para administradores
-const mockAdministrators = [
-  { id: 1, name: 'Ana Torres', role: 'Gerente', email: 'ana.torres@example.com', status: 'Activo' },
-  { id: 2, name: 'Luis Fernández', role: 'Asistente', email: 'luis.fernandez@example.com', status: 'Inactivo' },
-  { id: 3, name: 'Sofía Ramírez', role: 'Coordinadora', email: 'sofia.ramirez@example.com', status: 'Activo' },
+// Datos iniciales quemados con todos los campos
+const initialAdministrators = [
+  { id: 1, name: 'Ana Torres', role: 'Gerente', email: 'ana.torres@example.com', status: 'Activo', address: 'Calle 1', phone: '555-0101', gender: 'Femenino' },
+  { id: 2, name: 'Luis Fernández', role: 'Asistente', email: 'luis.fernandez@example.com', status: 'Inactivo', address: 'Avenida 2', phone: '555-0202', gender: 'Masculino' },
+  { id: 3, name: 'Sofía Ramírez', role: 'Coordinadora', email: 'sofia.ramirez@example.com', status: 'Activo', address: 'Carrera 3', phone: '555-0303', gender: 'Femenino' },
 ];
 
 export const Administrators = () => {
-  const [administrators, setAdministrators] = useState([]);
+  const [administrators, setAdministrators] = useState(initialAdministrators);
   const [currentPage, setCurrentPage] = useState(1);
   const [administratorsPerPage] = useState(6);
-
-  useEffect(() => {
-    setAdministrators(mockAdministrators);
-  }, []);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedAdmin, setSelectedAdmin] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    lastName: '',
+    address: '',
+    phone: '',
+    gender: '',
+    role: 'Administrativo',
+  });
 
   const indexOfLastAdministrator = currentPage * administratorsPerPage;
   const indexOfFirstAdministrator = indexOfLastAdministrator - administratorsPerPage;
@@ -29,44 +38,105 @@ export const Administrators = () => {
   const totalPages = Math.ceil(administrators.length / administratorsPerPage);
 
   const nextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
   const prevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
   const goToPage = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  const handleCreateAdministrator = () => {
-    showCreateConfirmation('Administrador');
-  };
+  const handleCreateAdministrator = () => setShowCreateModal(true);
 
   const handleViewAdministrator = (administrator) => {
-    showViewDetails(administrator.name, {
-      Rol: administrator.role,
-      Email: administrator.email,
-      Estado: administrator.status,
-    });
+    setSelectedAdmin(administrator);
+    setShowViewModal(true);
   };
 
   const handleEditAdministrator = (administrator) => {
-    showEditConfirmation('Administrador', administrator.name);
+    setSelectedAdmin(administrator);
+    setFormData({
+      name: administrator.name.split(' ')[0],
+      lastName: administrator.name.split(' ')[1] || '',
+      address: administrator.address || '',
+      phone: administrator.phone || '',
+      gender: administrator.gender || '',
+      role: administrator.role,
+    });
+    setShowEditModal(true);
   };
 
   const handleDeleteAdministrator = (administratorId, administratorName) => {
-    showDeleteConfirmation('Administrador', administratorName, () => {
-      const updatedAdministrators = administrators.filter((administrator) => administrator.id !== administratorId);
-      setAdministrators(updatedAdministrators);
+    setSelectedAdmin({ id: administratorId, name: administratorName });
+    setShowDeleteModal(true);
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCreateSubmit = (e) => {
+    e.preventDefault();
+    showCreateConfirmation('Administrador').then((result) => {
+      if (result.isConfirmed) {
+        const newAdministrator = {
+          id: administrators.length + 1,
+          name: `${formData.name} ${formData.lastName}`,
+          role: formData.role,
+          email: '',
+          status: 'Activo',
+          address: formData.address,
+          phone: formData.phone,
+          gender: formData.gender,
+        };
+        setAdministrators([...administrators, newAdministrator]);
+        setShowCreateModal(false);
+        setFormData({ name: '', lastName: '', address: '', phone: '', gender: '', role: 'Administrativo' });
+      }
     });
+  };
+
+  const handleEditSubmit = (e) => {
+    e.preventDefault();
+    showEditConfirmation('Administrador', `${formData.name} ${formData.lastName}`).then((result) => {
+      if (result.isConfirmed) {
+        const updatedAdministrators = administrators.map((admin) =>
+          admin.id === selectedAdmin.id
+            ? {
+                ...admin,
+                name: `${formData.name} ${formData.lastName}`,
+                role: formData.role,
+                address: formData.address,
+                phone: formData.phone,
+                gender: formData.gender,
+              }
+            : admin
+        );
+        setAdministrators(updatedAdministrators);
+        setShowEditModal(false);
+        setFormData({ name: '', lastName: '', address: '', phone: '', gender: '', role: 'Administrativo' });
+      }
+    });
+  };
+
+  const handleDeleteConfirm = () => {
+    showDeleteConfirmation('Administrador', selectedAdmin.name, () => {
+      const updatedAdministrators = administrators.filter((admin) => admin.id !== selectedAdmin.id);
+      setAdministrators(updatedAdministrators);
+      setShowDeleteModal(false);
+    });
+  };
+
+  const closeModal = () => {
+    setShowCreateModal(false);
+    setShowViewModal(false);
+    setShowEditModal(false);
+    setShowDeleteModal(false);
+    setFormData({ name: '', lastName: '', address: '', phone: '', gender: '', role: 'Administrativo' });
   };
 
   return (
@@ -81,6 +151,256 @@ export const Administrators = () => {
         </button>
       </div>
 
+      {/* Modal de Creación */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md transform transition-all duration-300 ease-in-out">
+            <h2 className="text-xl font-semibold text-[#4285F4] mb-6">Crear Nuevo Administrador</h2>
+            <form onSubmit={handleCreateSubmit} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleFormChange}
+                  className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4285F4] focus:border-transparent transition-all duration-200 leading-tight"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Apellido</label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleFormChange}
+                  className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4285F4] focus:border-transparent transition-all duration-200 leading-tight"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Dirección</label>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleFormChange}
+                  className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4285F4] focus:border-transparent transition-all duration-200 leading-tight"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleFormChange}
+                  className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4285F4] focus:border-transparent transition-all duration-200 leading-tight"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Género</label>
+                <select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleFormChange}
+                  className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4285F4] focus:border-transparent transition-all duration-200 leading-tight appearance-none"
+                  required
+                >
+                  <option value="">Seleccione</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Femenino">Femenino</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Rol</label>
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleFormChange}
+                  className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4285F4] focus:border-transparent transition-all duration-200 leading-tight appearance-none"
+                  required
+                >
+                  <option value="Administrativo">Administrativo</option>
+                  <option value="Gerente">Gerente</option>
+                  <option value="Asistente">Asistente</option>
+                  <option value="Coordinadora">Coordinadora</option>
+                </select>
+              </div>
+              <div className="flex justify-end space-x-4 mt-6">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="bg-gray-300 text-gray-700 font-medium py-2 px-5 rounded-lg hover:bg-gray-400 transition duration-200"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-[#34A853] text-white font-semibold py-2 px-5 rounded-lg hover:bg-[#2E964A] transition duration-200 shadow-md"
+                >
+                  Crear
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Ver */}
+      {showViewModal && selectedAdmin && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md transform transition-all duration-300 ease-in-out">
+            <h2 className="text-xl font-semibold text-[#4285F4] mb-6">Detalles del Administrador</h2>
+            <div className="space-y-4">
+              <p><span className="font-medium text-gray-700">Nombre:</span> {selectedAdmin.name}</p>
+              <p><span className="font-medium text-gray-700">Rol:</span> {selectedAdmin.role}</p>
+              <p><span className="font-medium text-gray-700">Email:</span> {selectedAdmin.email}</p>
+              <p><span className="font-medium text-gray-700">Estado:</span> {selectedAdmin.status}</p>
+              <p><span className="font-medium text-gray-700">Dirección:</span> {selectedAdmin.address}</p>
+              <p><span className="font-medium text-gray-700">Teléfono:</span> {selectedAdmin.phone}</p>
+              <p><span className="font-medium text-gray-700">Género:</span> {selectedAdmin.gender}</p>
+            </div>
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={closeModal}
+                className="bg-[#4285F4] text-white font-medium py-2 px-5 rounded-lg hover:bg-[#3A78D6] transition duration-200 shadow-md"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Editar */}
+      {showEditModal && selectedAdmin && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md transform transition-all duration-300 ease-in-out">
+            <h2 className="text-xl font-semibold text-[#4285F4] mb-6">Editar Administrador</h2>
+            <form onSubmit={handleEditSubmit} className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleFormChange}
+                  className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4285F4] focus:border-transparent transition-all duration-200 leading-tight"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Apellido</label>
+                <input
+                  type="text"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleFormChange}
+                  className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4285F4] focus:border-transparent transition-all duration-200 leading-tight"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Dirección</label>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleFormChange}
+                  className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4285F4] focus:border-transparent transition-all duration-200 leading-tight"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleFormChange}
+                  className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4285F4] focus:border-transparent transition-all duration-200 leading-tight"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Género</label>
+                <select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleFormChange}
+                  className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4285F4] focus:border-transparent transition-all duration-200 leading-tight appearance-none"
+                  required
+                >
+                  <option value="">Seleccione</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Femenino">Femenino</option>
+                  <option value="Otro">Otro</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Rol</label>
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleFormChange}
+                  className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4285F4] focus:border-transparent transition-all duration-200 leading-tight appearance-none"
+                  required
+                >
+                  <option value="Administrativo">Administrativo</option>
+                  <option value="Gerente">Gerente</option>
+                  <option value="Asistente">Asistente</option>
+                  <option value="Coordinadora">Coordinadora</option>
+                </select>
+              </div>
+              <div className="flex justify-end space-x-4 mt-6">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="bg-gray-300 text-gray-700 font-medium py-2 px-5 rounded-lg hover:bg-gray-400 transition duration-200"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="bg-[#FBBC05] text-white font-semibold py-2 px-5 rounded-lg hover:bg-[#E3A704] transition duration-200 shadow-md"
+                >
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Eliminar */}
+      {showDeleteModal && selectedAdmin && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md transform transition-all duration-300 ease-in-out">
+            <h2 className="text-xl font-semibold text-[#4285F4] mb-6">Eliminar Administrador</h2>
+            <p className="text-gray-600 mb-6">¿Estás seguro de eliminar a <strong>{selectedAdmin.name}</strong>? Esta acción no se puede deshacer.</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={closeModal}
+                className="bg-gray-300 text-gray-700 font-medium py-2 px-5 rounded-lg hover:bg-gray-400 transition duration-200"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="bg-[#EA4335] text-white font-medium py-2 px-5 rounded-lg hover:bg-[#D13B2F] transition duration-200 shadow-md"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white shadow-lg rounded-lg">
           <thead className="bg-[#4285F4] text-white">
@@ -90,6 +410,9 @@ export const Administrators = () => {
               <th className="py-3 px-4 text-left font-semibold">Rol</th>
               <th className="py-3 px-4 text-left font-semibold">Email</th>
               <th className="py-3 px-4 text-left font-semibold">Estado</th>
+              <th className="py-3 px-4 text-left font-semibold">Dirección</th>
+              <th className="py-3 px-4 text-left font-semibold">Teléfono</th>
+              <th className="py-3 px-4 text-left font-semibold">Género</th>
               <th className="py-3 px-4 text-left font-semibold">Acciones</th>
             </tr>
           </thead>
@@ -112,21 +435,24 @@ export const Administrators = () => {
                       {administrator.status}
                     </span>
                   </td>
+                  <td className="py-3 px-4 text-gray-700">{administrator.address}</td>
+                  <td className="py-3 px-4 text-gray-700">{administrator.phone}</td>
+                  <td className="py-3 px-4 text-gray-700">{administrator.gender}</td>
                   <td className="py-3 px-4 flex space-x-2">
                     <button
-                      className="bg-[#4285F4] text-white font-medium py-1 px-3 rounded-md hover:bg-[#3A78D6] transition duration-200 shadow-sm"
+                      className="bg-[#4285F4] text-white font-medium py-2 px-3 rounded-lg hover:bg-[#3A78D6] transition duration-200 shadow-sm"
                       onClick={() => handleViewAdministrator(administrator)}
                     >
                       Ver
                     </button>
                     <button
-                      className="bg-[#FBBC05] text-white font-medium py-1 px-3 rounded-md hover:bg-[#E3A704] transition duration-200 shadow-sm"
+                      className="bg-[#FBBC05] text-white font-medium py-2 px-3 rounded-lg hover:bg-[#E3A704] transition duration-200 shadow-sm"
                       onClick={() => handleEditAdministrator(administrator)}
                     >
                       Editar
                     </button>
                     <button
-                      className="bg-[#EA4335] text-white font-medium py-1 px-3 rounded-md hover:bg-[#D13B2F] transition duration-200 shadow-sm"
+                      className="bg-[#EA4335] text-white font-medium py-2 px-3 rounded-lg hover:bg-[#D13B2F] transition duration-200 shadow-sm"
                       onClick={() => handleDeleteAdministrator(administrator.id, administrator.name)}
                     >
                       Eliminar
@@ -136,7 +462,7 @@ export const Administrators = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="py-3 px-4 text-center text-gray-500">
+                <td colSpan="9" className="py-3 px-4 text-center text-gray-500">
                   No hay administradores disponibles
                 </td>
               </tr>
@@ -146,7 +472,7 @@ export const Administrators = () => {
       </div>
 
       <div className="flex justify-between items-center mt-4">
-        <div className="text-gray-600">
+        <div className="text-gray-700">
           Mostrando {indexOfFirstAdministrator + 1} -{' '}
           {indexOfLastAdministrator > administrators.length ? administrators.length : indexOfLastAdministrator} de{' '}
           {administrators.length} administradores

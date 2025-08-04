@@ -3,7 +3,7 @@ import {
   showCreateConfirmation,
   showViewDetails,
   showEditConfirmation,
-  showDeleteConfirmation
+  showDeleteConfirmation,
 } from '../../../../shared/utils/alerts';
 
 // Datos mockeados para tipos de donaciones
@@ -17,6 +17,9 @@ export const DonationsTypes = () => {
   const [donationTypes, setDonationTypes] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [typesPerPage] = useState(6);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedType, setSelectedType] = useState(null);
+  const [modalMode, setModalMode] = useState('create'); // 'create', 'edit', 'view'
 
   useEffect(() => {
     setDonationTypes(mockDonationsTypes);
@@ -29,36 +32,33 @@ export const DonationsTypes = () => {
   const totalPages = Math.ceil(donationTypes.length / typesPerPage);
 
   const nextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
   const prevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
   const goToPage = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
   const handleCreateDonationType = () => {
-    showCreateConfirmation('Tipo de Donación');
+    setSelectedType(null);
+    setModalMode('create');
+    setShowModal(true);
   };
 
   const handleViewDonationType = (donationType) => {
-    showViewDetails(donationType.name, {
-      Descripción: donationType.description,
-      Estado: donationType.status,
-    });
+    setSelectedType(donationType);
+    setModalMode('view');
+    setShowModal(true);
   };
 
   const handleEditDonationType = (donationType) => {
-    showEditConfirmation('Tipo de Donación', donationType.name);
+    setSelectedType(donationType);
+    setModalMode('edit');
+    setShowModal(true);
   };
 
   const handleDeleteDonationType = (donationTypeId, donationTypeName) => {
@@ -68,21 +68,114 @@ export const DonationsTypes = () => {
     });
   };
 
+  const closeModal = (updatedType = null) => {
+    setShowModal(false);
+    if (updatedType) {
+      const updatedTypes = donationTypes.map((t) =>
+        t.id === updatedType.id ? updatedType : t
+      );
+      setDonationTypes(updatedTypes);
+    } else if (modalMode === 'create' && updatedType) {
+      const newType = { id: donationTypes.length + 1, ...updatedType };
+      setDonationTypes([...donationTypes, newType]);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-[#4285F4]">Lista de Tipos de Donaciones</h1>
+        <h1 className="text-3xl font-bold text-blue-600">Lista de Tipos de Donaciones</h1>
         <button
-          className="bg-[#34A853] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[#2E964A] transition duration-200 shadow-md"
+          className="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition duration-200 shadow-md"
           onClick={handleCreateDonationType}
         >
           Crear Tipo de Donación
         </button>
       </div>
 
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-2xl font-bold text-blue-600 mb-4">
+              {modalMode === 'create' && 'Crear Nuevo Tipo de Donación'}
+              {modalMode === 'edit' && 'Editar Tipo de Donación'}
+              {modalMode === 'view' && 'Detalles del Tipo de Donación'}
+            </h2>
+            {modalMode !== 'view' ? (
+              <form onSubmit={(e) => { e.preventDefault(); closeModal({ ...selectedType, ...formData }); }} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+                  <input
+                    type="text"
+                    name="name"
+                    defaultValue={selectedType?.name || ''}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                    className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
+                  <input
+                    type="text"
+                    name="description"
+                    defaultValue={selectedType?.description || ''}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+                    className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                  <select
+                    name="status"
+                    defaultValue={selectedType?.status || 'Activo'}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value }))}
+                    className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none"
+                    required
+                  >
+                    <option value="Activo">Activo</option>
+                    <option value="Inactivo">Inactivo</option>
+                  </select>
+                </div>
+                <div className="flex justify-end space-x-4">
+                  <button
+                    type="button"
+                    onClick={() => closeModal()}
+                    className="bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-200"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition duration-200"
+                  >
+                    {modalMode === 'edit' ? 'Actualizar' : 'Guardar'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="space-y-4">
+                <p><strong>Nombre:</strong> {selectedType.name}</p>
+                <p><strong>Descripción:</strong> {selectedType.description}</p>
+                <p><strong>Estado:</strong> {selectedType.status}</p>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => closeModal()}
+                    className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white shadow-lg rounded-lg">
-          <thead className="bg-[#4285F4] text-white">
+          <thead className="bg-blue-600 text-white">
             <tr>
               <th className="py-3 px-4 text-left font-semibold">ID</th>
               <th className="py-3 px-4 text-left font-semibold">Nombre</th>
@@ -101,9 +194,7 @@ export const DonationsTypes = () => {
                   <td className="py-3 px-4">
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        donationType.status === 'Activo'
-                          ? 'bg-[#34A853]/20 text-[#34A853]'
-                          : 'bg-[#EA4335]/20 text-[#EA4335]'
+                        donationType.status === 'Activo' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
                       }`}
                     >
                       {donationType.status}
@@ -111,19 +202,19 @@ export const DonationsTypes = () => {
                   </td>
                   <td className="py-3 px-4 flex space-x-2">
                     <button
-                      className="bg-[#4285F4] text-white font-medium py-1 px-3 rounded-md hover:bg-[#3A78D6] transition duration-200 shadow-sm"
+                      className="bg-blue-600 text-white font-medium py-1 px-3 rounded-md hover:bg-blue-700 transition duration-200 shadow-sm"
                       onClick={() => handleViewDonationType(donationType)}
                     >
                       Ver
                     </button>
                     <button
-                      className="bg-[#FBBC05] text-white font-medium py-1 px-3 rounded-md hover:bg-[#E3A704] transition duration-200 shadow-sm"
+                      className="bg-yellow-500 text-white font-medium py-1 px-3 rounded-md hover:bg-yellow-600 transition duration-200 shadow-sm"
                       onClick={() => handleEditDonationType(donationType)}
                     >
                       Editar
                     </button>
                     <button
-                      className="bg-[#EA4335] text-white font-medium py-1 px-3 rounded-md hover:bg-[#D13B2F] transition duration-200 shadow-sm"
+                      className="bg-red-600 text-white font-medium py-1 px-3 rounded-md hover:bg-red-700 transition duration-200 shadow-sm"
                       onClick={() => handleDeleteDonationType(donationType.id, donationType.name)}
                     >
                       Eliminar
@@ -153,9 +244,7 @@ export const DonationsTypes = () => {
             onClick={prevPage}
             disabled={currentPage === 1}
             className={`py-2 px-4 rounded-md font-medium transition duration-200 shadow-sm ${
-              currentPage === 1
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-[#4285F4] text-white hover:bg-[#3A78D6]'
+              currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'
             }`}
           >
             Anterior
@@ -165,9 +254,7 @@ export const DonationsTypes = () => {
               key={page}
               onClick={() => goToPage(page)}
               className={`py-2 px-4 rounded-md font-medium transition duration-200 shadow-sm ${
-                currentPage === page
-                  ? 'bg-[#4285F4] text-white'
-                  : 'bg-white text-[#4285F4] hover:bg-[#4285F4]/10'
+                currentPage === page ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-100'
               }`}
             >
               {page}
@@ -177,9 +264,7 @@ export const DonationsTypes = () => {
             onClick={nextPage}
             disabled={currentPage === totalPages}
             className={`py-2 px-4 rounded-md font-medium transition duration-200 shadow-sm ${
-              currentPage === totalPages
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-[#4285F4] text-white hover:bg-[#3A78D6]'
+              currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'
             }`}
           >
             Siguiente

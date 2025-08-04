@@ -1,26 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
-  showCreateConfirmation,
-  showViewDetails,
   showEditConfirmation,
-  showDeleteConfirmation
+  showDeleteConfirmation,
 } from '../../../../shared/utils/alerts';
+import ProfessionalForm from './ProfessionalForm';
 
 // Datos mockeados para profesionales
 const mockProfessionals = [
-  { id: 1, name: 'Dr. Javier Morales', specialty: 'Oncólogo', email: 'javier.morales@example.com', status: 'Activo' },
-  { id: 2, name: 'Dra. Carla Sánchez', specialty: 'Pediatra', email: 'carla.sanchez@example.com', status: 'Inactivo' },
-  { id: 3, name: 'Dr. Pablo Ruiz', specialty: 'Psicólogo', email: 'pablo.ruiz@example.com', status: 'Activo' },
+  { id: 1, name: 'Dr. Javier Morales', specialty: 'Oncólogo', status: 'Activo', experience: '10 años en oncología', education: 'Médico Especialista', hasDocuments: true, availability: 'Lunes a Viernes', certificate: [], professionalCard: [], photo: [] },
+  { id: 2, name: 'Dra. Carla Sánchez', specialty: 'Pediatra', status: 'Inactivo', experience: '8 años en pediatría', education: 'Médico General', hasDocuments: false, availability: 'Miércoles y Viernes', certificate: [], professionalCard: [], photo: [] },
+  { id: 3, name: 'Dr. Pablo Ruiz', specialty: 'Psicólogo', status: 'Activo', experience: '15 años en psicología', education: 'Psicología Clínica', hasDocuments: true, availability: 'Lunes a Jueves', certificate: [], professionalCard: [], photo: [] },
 ];
 
 export const Professionals = () => {
-  const [professionals, setProfessionals] = useState([]);
+  const [professionals, setProfessionals] = useState(mockProfessionals);
   const [currentPage, setCurrentPage] = useState(1);
   const [professionalsPerPage] = useState(6);
-
-  useEffect(() => {
-    setProfessionals(mockProfessionals);
-  }, []);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedProfessional, setSelectedProfessional] = useState(null);
 
   const indexOfLastProfessional = currentPage * professionalsPerPage;
   const indexOfFirstProfessional = indexOfLastProfessional - professionalsPerPage;
@@ -29,37 +26,25 @@ export const Professionals = () => {
   const totalPages = Math.ceil(professionals.length / professionalsPerPage);
 
   const nextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
   const prevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
   const goToPage = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
   const handleCreateProfessional = () => {
-    showCreateConfirmation('Profesional');
-  };
-
-  const handleViewProfessional = (professional) => {
-    showViewDetails(professional.name, {
-      Especialidad: professional.specialty,
-      Email: professional.email,
-      Estado: professional.status,
-    });
+    setShowForm(true);
+    setSelectedProfessional(null); // Resetea para crear nuevo
   };
 
   const handleEditProfessional = (professional) => {
-    showEditConfirmation('Profesional', professional.name);
+    setSelectedProfessional(professional);
+    setShowForm(true);
   };
 
   const handleDeleteProfessional = (professionalId, professionalName) => {
@@ -69,27 +54,42 @@ export const Professionals = () => {
     });
   };
 
+  const closeForm = (updatedProfessional = null) => {
+    setShowForm(false);
+    setSelectedProfessional(null);
+    if (updatedProfessional) {
+      const updatedProfessionals = professionals.map((p) =>
+        p.id === updatedProfessional.id ? { ...updatedProfessional, hasDocuments: !!updatedProfessional.professionalCard.length } : p
+      );
+      setProfessionals(updatedProfessionals);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-[#4285F4]">Lista de Profesionales</h1>
+        <h1 className="text-3xl font-bold text-blue-600">Lista de Profesionales</h1>
         <button
-          className="bg-[#34A853] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[#2E964A] transition duration-200 shadow-md"
+          className="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition duration-200 shadow-md"
           onClick={handleCreateProfessional}
         >
           Crear Profesional
         </button>
       </div>
 
+      {showForm && <ProfessionalForm onClose={closeForm} professional={selectedProfessional} />}
+
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white shadow-lg rounded-lg">
-          <thead className="bg-[#4285F4] text-white">
+          <thead className="bg-blue-600 text-white">
             <tr>
               <th className="py-3 px-4 text-left font-semibold">ID</th>
               <th className="py-3 px-4 text-left font-semibold">Nombre</th>
               <th className="py-3 px-4 text-left font-semibold">Especialidad</th>
-              <th className="py-3 px-4 text-left font-semibold">Email</th>
               <th className="py-3 px-4 text-left font-semibold">Estado</th>
+              <th className="py-3 px-4 text-left font-semibold">Experiencia</th>
+              <th className="py-3 px-4 text-left font-semibold">Estudios</th>
+              <th className="py-3 px-4 text-left font-semibold">Documentos</th>
               <th className="py-3 px-4 text-left font-semibold">Acciones</th>
             </tr>
           </thead>
@@ -100,33 +100,31 @@ export const Professionals = () => {
                   <td className="py-3 px-4 text-gray-700">{professional.id}</td>
                   <td className="py-3 px-4 text-gray-700">{professional.name}</td>
                   <td className="py-3 px-4 text-gray-700">{professional.specialty}</td>
-                  <td className="py-3 px-4 text-gray-700">{professional.email}</td>
                   <td className="py-3 px-4">
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        professional.status === 'Activo'
-                          ? 'bg-[#34A853]/20 text-[#34A853]'
-                          : 'bg-[#EA4335]/20 text-[#EA4335]'
+                        professional.status === 'Activo' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
                       }`}
                     >
                       {professional.status}
                     </span>
                   </td>
+                  <td className="py-3 px-4 text-gray-700">{professional.experience}</td>
+                  <td className="py-3 px-4 text-gray-700">{professional.education}</td>
+                  <td className="py-3 px-4">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${professional.hasDocuments ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                      {professional.hasDocuments ? 'Sí' : 'No'}
+                    </span>
+                  </td>
                   <td className="py-3 px-4 flex space-x-2">
                     <button
-                      className="bg-[#4285F4] text-white font-medium py-1 px-3 rounded-md hover:bg-[#3A78D6] transition duration-200 shadow-sm"
-                      onClick={() => handleViewProfessional(professional)}
-                    >
-                      Ver
-                    </button>
-                    <button
-                      className="bg-[#FBBC05] text-white font-medium py-1 px-3 rounded-md hover:bg-[#E3A704] transition duration-200 shadow-sm"
+                      className="bg-yellow-500 text-white font-medium py-1 px-3 rounded-md hover:bg-yellow-600 transition duration-200 shadow-sm"
                       onClick={() => handleEditProfessional(professional)}
                     >
                       Editar
                     </button>
                     <button
-                      className="bg-[#EA4335] text-white font-medium py-1 px-3 rounded-md hover:bg-[#D13B2F] transition duration-200 shadow-sm"
+                      className="bg-red-600 text-white font-medium py-1 px-3 rounded-md hover:bg-red-700 transition duration-200 shadow-sm"
                       onClick={() => handleDeleteProfessional(professional.id, professional.name)}
                     >
                       Eliminar
@@ -136,7 +134,7 @@ export const Professionals = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="6" className="py-3 px-4 text-center text-gray-500">
+                <td colSpan="8" className="py-3 px-4 text-center text-gray-500">
                   No hay profesionales disponibles
                 </td>
               </tr>
@@ -156,9 +154,7 @@ export const Professionals = () => {
             onClick={prevPage}
             disabled={currentPage === 1}
             className={`py-2 px-4 rounded-md font-medium transition duration-200 shadow-sm ${
-              currentPage === 1
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-[#4285F4] text-white hover:bg-[#3A78D6]'
+              currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'
             }`}
           >
             Anterior
@@ -168,9 +164,7 @@ export const Professionals = () => {
               key={page}
               onClick={() => goToPage(page)}
               className={`py-2 px-4 rounded-md font-medium transition duration-200 shadow-sm ${
-                currentPage === page
-                  ? 'bg-[#4285F4] text-white'
-                  : 'bg-white text-[#4285F4] hover:bg-[#4285F4]/10'
+                currentPage === page ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-100'
               }`}
             >
               {page}
@@ -180,9 +174,7 @@ export const Professionals = () => {
             onClick={nextPage}
             disabled={currentPage === totalPages}
             className={`py-2 px-4 rounded-md font-medium transition duration-200 shadow-sm ${
-              currentPage === totalPages
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-[#4285F4] text-white hover:bg-[#3A78D6]'
+              currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'
             }`}
           >
             Siguiente
@@ -191,4 +183,4 @@ export const Professionals = () => {
       </div>
     </div>
   );
-};  
+};

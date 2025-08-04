@@ -3,7 +3,7 @@ import {
   showCreateConfirmation,
   showViewDetails,
   showEditConfirmation,
-  showDeleteConfirmation
+  showDeleteConfirmation,
 } from '../../../../shared/utils/alerts';
 
 // Datos mockeados para eventos de la fundación
@@ -17,6 +17,9 @@ export const FoundationEvents = () => {
   const [foundationEvents, setFoundationEvents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [eventsPerPage] = useState(6);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [modalMode, setModalMode] = useState('create'); // 'create', 'edit', 'view'
 
   useEffect(() => {
     setFoundationEvents(mockFoundationEvents);
@@ -29,37 +32,33 @@ export const FoundationEvents = () => {
   const totalPages = Math.ceil(foundationEvents.length / eventsPerPage);
 
   const nextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
   const prevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
   const goToPage = (page) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
-    }
+    if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
   const handleCreateEvent = () => {
-    showCreateConfirmation('Evento');
+    setSelectedEvent(null);
+    setModalMode('create');
+    setShowModal(true);
   };
 
   const handleViewEvent = (event) => {
-    showViewDetails(event.name, {
-      Fecha: event.date,
-      Tipo: event.type,
-      Estado: event.status,
-    });
+    setSelectedEvent(event);
+    setModalMode('view');
+    setShowModal(true);
   };
 
   const handleEditEvent = (event) => {
-    showEditConfirmation('Evento', event.name);
+    setSelectedEvent(event);
+    setModalMode('edit');
+    setShowModal(true);
   };
 
   const handleDeleteEvent = (eventId, eventName) => {
@@ -69,21 +68,129 @@ export const FoundationEvents = () => {
     });
   };
 
+  const closeModal = (updatedEvent = null) => {
+    setShowModal(false);
+    if (updatedEvent) {
+      const updatedEvents = foundationEvents.map((e) =>
+        e.id === updatedEvent.id ? updatedEvent : e
+      );
+      setFoundationEvents(updatedEvents);
+    } else if (modalMode === 'create' && updatedEvent) {
+      const newEvent = { id: foundationEvents.length + 1, ...updatedEvent };
+      setFoundationEvents([...foundationEvents, newEvent]);
+    }
+  };
+
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-[#4285F4]">Lista de Eventos de la Fundación</h1>
+        <h1 className="text-3xl font-bold text-blue-600">Lista de Eventos de la Fundación</h1>
         <button
-          className="bg-[#34A853] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[#2E964A] transition duration-200 shadow-md"
+          className="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition duration-200 shadow-md"
           onClick={handleCreateEvent}
         >
           Crear Evento
         </button>
       </div>
 
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-2xl font-bold text-blue-600 mb-4">
+              {modalMode === 'create' && 'Crear Nuevo Evento'}
+              {modalMode === 'edit' && 'Editar Evento'}
+              {modalMode === 'view' && 'Detalles del Evento'}
+            </h2>
+            {modalMode !== 'view' ? (
+              <form onSubmit={(e) => { e.preventDefault(); closeModal({ ...selectedEvent, ...formData }); }} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+                  <input
+                    type="text"
+                    name="name"
+                    defaultValue={selectedEvent?.name || ''}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                    className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+                  <input
+                    type="date"
+                    name="date"
+                    defaultValue={selectedEvent?.date || new Date().toISOString().split('T')[0]}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
+                    className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Tipo</label>
+                  <select
+                    name="type"
+                    defaultValue={selectedEvent?.type || 'Recaudación'}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, type: e.target.value }))}
+                    className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none"
+                    required
+                  >
+                    <option value="Recaudación">Recaudación</option>
+                    <option value="Cultural">Cultural</option>
+                    <option value="Deportivo">Deportivo</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+                  <select
+                    name="status"
+                    defaultValue={selectedEvent?.status || 'Planificado'}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, status: e.target.value }))}
+                    className="w-full p-3 h-11 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 appearance-none"
+                    required
+                  >
+                    <option value="Planificado">Planificado</option>
+                    <option value="Completado">Completado</option>
+                  </select>
+                </div>
+                <div className="flex justify-end space-x-4">
+                  <button
+                    type="button"
+                    onClick={() => closeModal()}
+                    className="bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-200"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition duration-200"
+                  >
+                    {modalMode === 'edit' ? 'Actualizar' : 'Guardar'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="space-y-4">
+                <p><strong>Nombre:</strong> {selectedEvent.name}</p>
+                <p><strong>Fecha:</strong> {selectedEvent.date}</p>
+                <p><strong>Tipo:</strong> {selectedEvent.type}</p>
+                <p><strong>Estado:</strong> {selectedEvent.status}</p>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => closeModal()}
+                    className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white shadow-lg rounded-lg">
-          <thead className="bg-[#4285F4] text-white">
+          <thead className="bg-blue-600 text-white">
             <tr>
               <th className="py-3 px-4 text-left font-semibold">ID</th>
               <th className="py-3 px-4 text-left font-semibold">Nombre</th>
@@ -104,9 +211,7 @@ export const FoundationEvents = () => {
                   <td className="py-3 px-4">
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        event.status === 'Completado'
-                          ? 'bg-[#34A853]/20 text-[#34A853]'
-                          : 'bg-[#FBBC05]/20 text-[#FBBC05]'
+                        event.status === 'Completado' ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'
                       }`}
                     >
                       {event.status}
@@ -114,19 +219,19 @@ export const FoundationEvents = () => {
                   </td>
                   <td className="py-3 px-4 flex space-x-2">
                     <button
-                      className="bg-[#4285F4] text-white font-medium py-1 px-3 rounded-md hover:bg-[#3A78D6] transition duration-200 shadow-sm"
+                      className="bg-blue-600 text-white font-medium py-1 px-3 rounded-md hover:bg-blue-700 transition duration-200 shadow-sm"
                       onClick={() => handleViewEvent(event)}
                     >
                       Ver
                     </button>
                     <button
-                      className="bg-[#FBBC05] text-white font-medium py-1 px-3 rounded-md hover:bg-[#E3A704] transition duration-200 shadow-sm"
+                      className="bg-yellow-500 text-white font-medium py-1 px-3 rounded-md hover:bg-yellow-600 transition duration-200 shadow-sm"
                       onClick={() => handleEditEvent(event)}
                     >
                       Editar
                     </button>
                     <button
-                      className="bg-[#EA4335] text-white font-medium py-1 px-3 rounded-md hover:bg-[#D13B2F] transition duration-200 shadow-sm"
+                      className="bg-red-600 text-white font-medium py-1 px-3 rounded-md hover:bg-red-700 transition duration-200 shadow-sm"
                       onClick={() => handleDeleteEvent(event.id, event.name)}
                     >
                       Eliminar
@@ -156,9 +261,7 @@ export const FoundationEvents = () => {
             onClick={prevPage}
             disabled={currentPage === 1}
             className={`py-2 px-4 rounded-md font-medium transition duration-200 shadow-sm ${
-              currentPage === 1
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-[#4285F4] text-white hover:bg-[#3A78D6]'
+              currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'
             }`}
           >
             Anterior
@@ -168,9 +271,7 @@ export const FoundationEvents = () => {
               key={page}
               onClick={() => goToPage(page)}
               className={`py-2 px-4 rounded-md font-medium transition duration-200 shadow-sm ${
-                currentPage === page
-                  ? 'bg-[#4285F4] text-white'
-                  : 'bg-white text-[#4285F4] hover:bg-[#4285F4]/10'
+                currentPage === page ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-100'
               }`}
             >
               {page}
@@ -180,9 +281,7 @@ export const FoundationEvents = () => {
             onClick={nextPage}
             disabled={currentPage === totalPages}
             className={`py-2 px-4 rounded-md font-medium transition duration-200 shadow-sm ${
-              currentPage === totalPages
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-[#4285F4] text-white hover:bg-[#3A78D6]'
+              currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'
             }`}
           >
             Siguiente
