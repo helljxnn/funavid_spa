@@ -1,0 +1,19 @@
+# Ignorar node_modules y archivos comunes de Node en la raíz
+node_modules/
+package-lock.json
+package.json
+
+# Archivos y carpetas de producción
+build/
+dist/
+
+# Archivos sensibles
+.env
+
+# Logs
+*.log
+
+# firebase
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
